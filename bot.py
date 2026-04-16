@@ -39,11 +39,10 @@ async def link_handler(message: Message) -> None:
     
     if url.startswith("http://") or url.startswith("https://"):
         try:
-            response = requests.post("https://localhost:443/api/links", json={"url": url})
+            response = requests.post("https://localhost:8443/api/links", data=url,headers={'Content-Type': 'text/plain'}, verify=False)
             if response.status_code == 200:
-                data = response.json()
-                short_url = data.get("short_url")
-                await message.answer(f"Сокращенная ссылка: {short_url}")
+                shortURLcode = response.text.strip()
+                await message.answer(f"Сокращенная ссылка: https://krch.io/{shortURLcode}")
             else:
                 await message.answer("Ошибка при сокращении ссылки. Попробуйте позже.")
         except Exception as e:
