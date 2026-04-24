@@ -4,6 +4,8 @@ import logging
 import sys
 from os import getenv
 
+import json
+
 import requests
 
 
@@ -39,16 +41,33 @@ async def link_handler(message: Message) -> None:
     
     if url.startswith("http://") or url.startswith("https://"):
         try:
-            response = requests.post("https://localhost:8443/api/links", data=url,headers={'Content-Type': 'text/plain'}, verify=False)
-            if response.status_code == 200:
-                shortURLcode = response.text.strip()
-                await message.answer(f"Сокращенная ссылка: https://krch.io/{shortURLcode}")
+           
+            payload = json.dumps(url)
+            
+            headers = {
+                'Content-Type': 'Application/json'
+            }
+
+            print(url)
+
+            response = requests.request("POST", "https://localhost:443/api/links", headers=headers, data=payload, verify=False)           
+            if response.status_code == 201:
+                try:
+                    data = response.json()
+                    shortURLcode = data.get("shortCode")
+                    if shortURLcode:
+                        await message.answer(f"Сокращенная ссылка: https://krch.io/{shortURLcode}")
+                    else:
+                        await message.answer("Ошибка: не удалось получить короткий код из ответа API.")
+                except Exception as e:
+                    await message.answer(f"Ошибка при обработке ответа API: {e}")
             else:
-                await message.answer("Ошибка при сокращении ссылки. Попробуйте позже.")
+                await message.answer(f"Ошибка при сокращении ссылки. Код ответа: {response.status_code}")
         except Exception as e:
-            await message.answer(f"Произошла ошибка: {e}")
-    else:
-        await message.answer("Пожалуйста, отправьте действительную ссылку, начинающуюся с http:// или https://")
+            await message.answer(f"Произошла ошибка при обращении к API: {e}")
+
+
+
 
 
 if __name__ == "__main__":
