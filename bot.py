@@ -3,7 +3,7 @@ import os
 import logging
 import sys
 from os import getenv
-
+from dotenv import load_dotenv
 import json
 
 import requests
@@ -15,7 +15,10 @@ from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart
 from aiogram.types import Message
 
-TOKEN = "8378017874:AAFJ307G9_oe9rmFr_qHGwxoTA9i49fD7hY" # i dont care about token btw
+load.dotenv()
+
+TOKEN =  os.getenv("TOKEN")
+
 
 dp = Dispatcher()
 
